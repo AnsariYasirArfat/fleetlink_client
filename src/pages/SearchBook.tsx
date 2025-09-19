@@ -2,17 +2,36 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { vehicleApi, bookingApi, apiErrorMessage } from "../services/api";
+import { vehicleApi, bookingApi, apiErrorMessage } from "@/services/api";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
 import { formatDateForApi } from "@/lib/utils";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import Spinner from "@/components/ui/spinner";
 
-// Form validation schema
 const searchSchema = z.object({
-  capacityRequired: z.number().min(1, "Capacity must be at least 1 kg"),
-  fromPincode: z.string().regex(/^\d{6}$/, "Pincode must be 6 digits"),
-  toPincode: z.string().regex(/^\d{6}$/, "Pincode must be 6 digits"),
-  startTime: z.string().min(1, "Start time is required"),
+  capacityRequired: z.coerce
+    .number<number>({ error: "Capacity required" })
+    .int("Capacity must be an integer")
+    .min(1, "Capacity must be at least 1 kg"),
+  fromPincode: z
+    .string({ error: "From pincode is required" })
+    .regex(/^\d{6}$/, "Pincode must be 6 digits"),
+  toPincode: z
+    .string({ error: "To pincode is required" })
+    .regex(/^\d{6}$/, "Pincode must be 6 digits"),
+  startTime: z
+    .string({ error: "Start time is required" })
+    .min(1, "Start time is required"),
 });
 
 export default function SearchBook() {
@@ -23,16 +42,26 @@ export default function SearchBook() {
   >([]);
   const [searchPerformed, setSearchPerformed] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-  } = useForm<SearchFormData>({
+  const dateTimeLocalNow = new Date(
+    new Date().getTime() - new Date().getTimezoneOffset() * 60000
+  )
+    .toISOString()
+    .slice(0, 16);
+
+  const defaultValues = {
+    capacityRequired: "" as unknown as number,
+    fromPincode: "",
+    toPincode: "",
+    startTime: dateTimeLocalNow,
+  };
+
+  const form = useForm<SearchFormData>({
     resolver: zodResolver(searchSchema),
+    mode: "onTouched",
+    defaultValues,
   });
 
-  const watchedValues = watch();
+  const watchedValues = form.watch();
 
   const onSearch = async (data: SearchFormData) => {
     setIsSearching(true);
@@ -67,7 +96,6 @@ export default function SearchBook() {
       });
 
       toast.success("Vehicle booked successfully!");
-      // Remove the booked vehicle from the list
       setAvailableVehicles((prev) => prev.filter((v) => v._id !== vehicle._id));
     } catch (error: unknown) {
       console.error("Error booking vehicle:", error);
@@ -96,105 +124,103 @@ export default function SearchBook() {
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
               Search Criteria
             </h2>
-            <form onSubmit={handleSubmit(onSearch)} className="space-y-4">
-              {/* Capacity Required */}
-              <div>
-                <label
-                  htmlFor="capacityRequired"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Capacity Required (KG) *
-                </label>
-                <input
-                  {...register("capacityRequired", { valueAsNumber: true })}
-                  type="number"
-                  id="capacityRequired"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., 500"
-                  min="1"
-                />
-                {errors.capacityRequired && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.capacityRequired.message}
-                  </p>
-                )}
-              </div>
 
-              {/* From Pincode */}
-              <div>
-                <label
-                  htmlFor="fromPincode"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  From Pincode *
-                </label>
-                <input
-                  {...register("fromPincode")}
-                  type="text"
-                  id="fromPincode"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., 110001"
-                  maxLength={6}
-                />
-                {errors.fromPincode && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.fromPincode.message}
-                  </p>
-                )}
-              </div>
-
-              {/* To Pincode */}
-              <div>
-                <label
-                  htmlFor="toPincode"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  To Pincode *
-                </label>
-                <input
-                  {...register("toPincode")}
-                  type="text"
-                  id="toPincode"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., 400001"
-                  maxLength={6}
-                />
-                {errors.toPincode && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.toPincode.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Start Time */}
-              <div>
-                <label
-                  htmlFor="startTime"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Start Date & Time *
-                </label>
-                <input
-                  {...register("startTime")}
-                  type="datetime-local"
-                  id="startTime"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                />
-                {errors.startTime && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.startTime.message}
-                  </p>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                disabled={isSearching}
-                className="w-full px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSearch)}
+                className="space-y-4"
               >
-                {isSearching ? "Searching..." : "Search Availability"}
-              </button>
-            </form>
+                <FormField
+                  control={form.control}
+                  name="capacityRequired"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Capacity Required (KG) *</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="capacityRequired"
+                          type="number"
+                          inputMode="numeric"
+                          placeholder="e.g., 500"
+                          min={1}
+                          {...field}
+                          value={field.value ?? ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="fromPincode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>From Pincode *</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="fromPincode"
+                          placeholder="e.g., 110001"
+                          maxLength={6}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="toPincode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>To Pincode *</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="toPincode"
+                          placeholder="e.g., 400001"
+                          maxLength={6}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="startTime"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Start Date & Time *</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="startTime"
+                          type="datetime-local"
+                          {...field}
+                          value={field.value ?? ""}
+                          defaultValue={dateTimeLocalNow}
+                          min={dateTimeLocalNow}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  type="submit"
+                  disabled={isSearching}
+                  className="w-full bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSearching && <Spinner />}
+                  {isSearching ? "Searching..." : "Search Availability"}
+                </Button>
+              </form>
+            </Form>
           </div>
         </div>
 
@@ -266,15 +292,16 @@ export default function SearchBook() {
                           </div>
                         </div>
                         <div className="ml-4">
-                          <button
+                          <Button
                             onClick={() => onBookVehicle(vehicle)}
                             disabled={isBooking === vehicle._id}
-                            className="px-4 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-4 py-2 bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
+                            {isBooking === vehicle._id && <Spinner />}
                             {isBooking === vehicle._id
                               ? "Booking..."
                               : "Book Now"}
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     </div>

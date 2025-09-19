@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router";
-import Layout from "./components/layout/Layout";
-import Dashboard from "./pages/Dashboard";
-import AddVehicle from "./pages/AddVehicle";
-import SearchBook from "./pages/SearchBook";
+import Layout from "@/components/layout/Layout";
+import Dashboard from "@/pages/Dashboard";
+import AddVehicle from "@/pages/AddVehicle";
+import SearchBook from "@/pages/SearchBook";
 import Bookings from "@/pages/Bookings";
 
 

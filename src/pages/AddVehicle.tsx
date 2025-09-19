@@ -4,30 +4,48 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiErrorMessage, vehicleApi } from "../services/api";
 import { toast } from "sonner";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import Spinner from "@/components/ui/spinner";
 
-// Form validation schema
 const addVehicleSchema = z.object({
-  name: z.string().min(1, "Vehicle name is required").max(100, "Name too long"),
-  capacityKg: z
-    .number()
+  name: z
+    .string({ error: "Vehicle name is required" })
+    .min(1, "Vehicle name is required")
+    .max(100, "Name too long"),
+  capacityKg: z.coerce
+    .number<number>({ error: "Capacity is required" })
+    .int("Capacity must be an integer")
     .min(1, "Capacity must be at least 1 kg")
-    .max(100000, "Capacity too high"),
-  tyres: z
-    .number()
-    .min(2, "Must have at least 2 tyres")
-    .max(20, "Too many tyres"),
+    .max(50000, "Capacity too high"),
+  tyres: z.coerce
+    .number<number>({ error: "Number of tyres is required" })
+    .int("Number of tyres must be an integer")
+    .min(4, "Must have at least 4 tyres")
+    .max(32, "Too many tyres"),
 });
 
 export default function AddVehicle() {
   const [isLoading, setIsLoading] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<AddVehicleFormData>({
+  const defaultValues = {
+    name: "",
+    capacityKg: "" as unknown as number,
+    tyres: "" as unknown as number,
+  };
+
+  const form = useForm<AddVehicleFormData>({
     resolver: zodResolver(addVehicleSchema),
+    mode: "onTouched",
+    defaultValues,
   });
 
   const onSubmit = async (data: AddVehicleFormData) => {
@@ -35,7 +53,7 @@ export default function AddVehicle() {
     try {
       await vehicleApi.addVehicle(data);
       toast.success("Vehicle added successfully!");
-      reset();
+      form.reset(defaultValues);
     } catch (error) {
       console.error("Error adding vehicle:", error);
       toast.error(apiErrorMessage(error));
@@ -45,7 +63,7 @@ export default function AddVehicle() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto p-4">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Add New Vehicle</h1>
         <p className="mt-2 text-gray-600">
@@ -54,86 +72,89 @@ export default function AddVehicle() {
       </div>
 
       <div className="bg-white shadow-sm rounded-lg border">
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
-          {/* Vehicle Name */}
-          <div>
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Vehicle Name *
-            </label>
-            <input
-              {...register("name")}
-              type="text"
-              id="name"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="e.g., Truck-001, Van-002"
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="p-6 space-y-6"
+          >
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Vehicle Name *</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="name"
+                      placeholder="e.g., Truck-001, Van-002"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.name && (
-              <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-            )}
-          </div>
 
-          {/* Capacity */}
-          <div>
-            <label
-              htmlFor="capacityKg"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Capacity (KG) *
-            </label>
-            <input
-              {...register("capacityKg", { valueAsNumber: true })}
-              type="number"
-              id="capacityKg"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="e.g., 1000"
-              min="1"
-              max="100000"
-            />
-            {errors.capacityKg && (
-              <p className="mt-1 text-sm text-red-600">
-                {errors.capacityKg.message}
-              </p>
-            )}
-          </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+              <FormField
+                control={form.control}
+                name="capacityKg"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Capacity (KG) *</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        inputMode="numeric"
+                        id="capacityKg"
+                        placeholder="e.g., 1000"
+                        min={1}
+                        max={50000}
+                        {...field}
+                        value={field.value ?? ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          {/* Tyres */}
-          <div>
-            <label
-              htmlFor="tyres"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Number of Tyres *
-            </label>
-            <input
-              {...register("tyres", { valueAsNumber: true })}
-              type="number"
-              id="tyres"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="e.g., 6"
-              min="2"
-              max="20"
-            />
-            {errors.tyres && (
-              <p className="mt-1 text-sm text-red-600">
-                {errors.tyres.message}
-              </p>
-            )}
-          </div>
+              <FormField
+                control={form.control}
+                name="tyres"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Number of Tyres *</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="tyres"
+                        type="number"
+                        inputMode="numeric"
+                        placeholder="e.g., 6"
+                        min={2}
+                        max={32}
+                        {...field}
+                        value={field.value ?? ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-          {/* Submit Button */}
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? "Adding Vehicle..." : "Add Vehicle"}
-            </button>
-          </div>
-        </form>
+            <div className="flex justify-end">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full px-6 py-2 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading && <Spinner />}
+                {isLoading ? "Adding Vehicle..." : "Add Vehicle"}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </div>
     </div>
   );
