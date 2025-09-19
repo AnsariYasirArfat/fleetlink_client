@@ -53,7 +53,7 @@ export default function AddVehicle() {
     try {
       await vehicleApi.addVehicle(data);
       toast.success("Vehicle added successfully!");
-      form.reset(defaultValues);
+      form.reset(defaultValues)
     } catch (error) {
       console.error("Error adding vehicle:", error);
       toast.error(apiErrorMessage(error));
@@ -63,20 +63,20 @@ export default function AddVehicle() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Add New Vehicle</h1>
-        <p className="mt-2 text-gray-600">
+    <div className="max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="mb-6 sm:mb-8 text-center sm:text-left">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
+          Add New Vehicle
+        </h1>
+        <p className="mt-2 text-sm sm:text-base text-gray-600">
           Add a new vehicle to your fleet with capacity and specifications
         </p>
       </div>
 
       <div className="bg-white shadow-sm rounded-lg border">
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="p-6 space-y-6"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="p-4 sm:p-6 lg:p-8 space-y-6">
             <FormField
               control={form.control}
               name="name"
@@ -95,7 +95,7 @@ export default function AddVehicle() {
               )}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <FormField
                 control={form.control}
                 name="capacityKg"
@@ -143,11 +143,19 @@ export default function AddVehicle() {
               />
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex flex-col sm:flex-row gap-4 sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => form.reset(defaultValues)}
+                className="w-full sm:w-auto"
+              >
+                Reset Form
+              </Button>
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full px-6 py-2 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading && <Spinner />}
                 {isLoading ? "Adding Vehicle..." : "Add Vehicle"}

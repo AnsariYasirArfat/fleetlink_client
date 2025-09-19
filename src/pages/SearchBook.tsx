@@ -37,9 +37,7 @@ const searchSchema = z.object({
 export default function SearchBook() {
   const [isSearching, setIsSearching] = useState(false);
   const [isBooking, setIsBooking] = useState<string | null>(null);
-  const [availableVehicles, setAvailableVehicles] = useState<
-    AvailableVehicle[]
-  >([]);
+  const [availableVehicles, setAvailableVehicles] = useState<AvailableVehicle[]>([]);
   const [searchPerformed, setSearchPerformed] = useState(false);
 
   const dateTimeLocalNow = new Date(
@@ -106,30 +104,27 @@ export default function SearchBook() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
+    <div className="max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
           Search & Book Vehicles
         </h1>
-        <p className="mt-2 text-gray-600">
-          Find available vehicles based on your requirements and book them
-          instantly
+        <p className="mt-2 text-sm sm:text-base text-gray-600">
+          Find available vehicles based on your requirements and book them instantly
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
         {/* Search Form */}
-        <div className="lg:col-span-1">
-          <div className="bg-white shadow-sm rounded-lg border p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        <div className="xl:col-span-1">
+          <div className="bg-white shadow-sm rounded-lg border p-4 sm:p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 sm:mb-6">
               Search Criteria
             </h2>
 
             <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSearch)}
-                className="space-y-4"
-              >
+              <form onSubmit={form.handleSubmit(onSearch)} className="space-y-4 sm:space-y-6">
                 <FormField
                   control={form.control}
                   name="capacityRequired"
@@ -152,43 +147,45 @@ export default function SearchBook() {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="fromPincode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>From Pincode *</FormLabel>
-                      <FormControl>
-                        <Input
-                          id="fromPincode"
-                          placeholder="e.g., 110001"
-                          maxLength={6}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="fromPincode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>From Pincode *</FormLabel>
+                        <FormControl>
+                          <Input
+                            id="fromPincode"
+                            placeholder="e.g., 110001"
+                            maxLength={6}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="toPincode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>To Pincode *</FormLabel>
-                      <FormControl>
-                        <Input
-                          id="toPincode"
-                          placeholder="e.g., 400001"
-                          maxLength={6}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="toPincode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>To Pincode *</FormLabel>
+                        <FormControl>
+                          <Input
+                            id="toPincode"
+                            placeholder="e.g., 400001"
+                            maxLength={6}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 <FormField
                   control={form.control}
@@ -225,35 +222,32 @@ export default function SearchBook() {
         </div>
 
         {/* Search Results */}
-        <div className="lg:col-span-2">
+        <div className="xl:col-span-2">
           <div className="bg-white shadow-sm rounded-lg border">
-            <div className="p-6 border-b">
-              <h2 className="text-lg font-semibold text-gray-900">
-                Available Vehicles
-              </h2>
+            <div className="p-4 sm:p-6 border-b">
+              <h2 className="text-lg font-semibold text-gray-900">Available Vehicles</h2>
               {searchPerformed && (
                 <p className="text-sm text-gray-600 mt-1">
-                  Found {availableVehicles.length} vehicle(s) matching your
-                  criteria
+                  Found {availableVehicles.length} vehicle(s) matching your criteria
                 </p>
               )}
             </div>
 
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               {!searchPerformed ? (
-                <div className="text-center py-12">
-                  <div className="text-gray-400 text-6xl mb-4">🔍</div>
-                  <p className="text-gray-500">
+                <div className="text-center py-8 sm:py-12">
+                  <div className="text-gray-400 text-4xl sm:text-6xl mb-4">🔍</div>
+                  <p className="text-gray-500 text-sm sm:text-base">
                     Enter your search criteria to find available vehicles
                   </p>
                 </div>
               ) : availableVehicles.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="text-gray-400 text-6xl mb-4">🚫</div>
-                  <p className="text-gray-500">
+                <div className="text-center py-8 sm:py-12">
+                  <div className="text-gray-400 text-4xl sm:text-6xl mb-4">🚫</div>
+                  <p className="text-gray-500 text-sm sm:text-base">
                     No vehicles available for the specified criteria
                   </p>
-                  <p className="text-sm text-gray-400 mt-2">
+                  <p className="text-xs sm:text-sm text-gray-400 mt-2">
                     Try adjusting your search parameters
                   </p>
                 </div>
@@ -264,43 +258,46 @@ export default function SearchBook() {
                       key={vehicle._id}
                       className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
                     >
-                      <div className="flex justify-between items-start">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                         <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-gray-900">
+                          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
                             {vehicle.name}
                           </h3>
-                          <div className="mt-2 grid grid-cols-2 gap-4 text-sm text-gray-600">
-                            <div>
-                              <span className="font-medium">Capacity:</span>{" "}
-                              {vehicle.capacityKg} KG
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600">
+                            <div className="flex items-center">
+                              <span className="font-medium mr-2">Capacity:</span>
+                              <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                                {vehicle.capacityKg} KG
+                              </span>
                             </div>
-                            <div>
-                              <span className="font-medium">Tyres:</span>{" "}
-                              {vehicle.tyres}
+                            <div className="flex items-center">
+                              <span className="font-medium mr-2">Tyres:</span>
+                              <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">
+                                {vehicle.tyres}
+                              </span>
                             </div>
-                            <div>
-                              <span className="font-medium">
-                                Estimated Duration:
-                              </span>{" "}
-                              {vehicle.estimatedRideDurationHours} hours
+                            <div className="flex items-center">
+                              <span className="font-medium mr-2">Duration:</span>
+                              <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
+                                {vehicle.estimatedRideDurationHours} hours
+                              </span>
                             </div>
-                            <div>
-                              <span className="font-medium">Route:</span>{" "}
-                              {watchedValues.fromPincode} →{" "}
-                              {watchedValues.toPincode}
+                            <div className="flex items-center">
+                              <span className="font-medium mr-2">Route:</span>
+                              <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">
+                                {watchedValues.fromPincode} → {watchedValues.toPincode}
+                              </span>
                             </div>
                           </div>
                         </div>
-                        <div className="ml-4">
+                        <div className="flex-shrink-0">
                           <Button
                             onClick={() => onBookVehicle(vehicle)}
                             disabled={isBooking === vehicle._id}
-                            className="px-4 py-2 bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full sm:w-auto px-4 py-2 bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {isBooking === vehicle._id && <Spinner />}
-                            {isBooking === vehicle._id
-                              ? "Booking..."
-                              : "Book Now"}
+                            {isBooking === vehicle._id ? "Booking..." : "Book Now"}
                           </Button>
                         </div>
                       </div>
